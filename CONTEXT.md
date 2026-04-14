@@ -14,7 +14,7 @@ Last updated: 2026-04-14
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | Not deployed yet — Phase 1 complete | ⏳ In Progress |
+| RAG Knowledge Chatbot | Not deployed yet — Phase 2 complete, Phase 3 next | ⏳ In Progress |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -29,18 +29,23 @@ Last updated: 2026-04-14
 
 ### AWS Infrastructure (RAG Chatbot)
 - Region: us-east-1
-- CloudFormation template: written and validated — commit 580660d
+- Stack: `rag-knowledge-chatbot` — live in us-east-1
+- S3 Bucket: `rag-chatbot-603509861186-dev`
+- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (MOCK — Phase 3 wires real Lambda)
+- Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
+- Titan Embeddings v2: ✅ UNBLOCKED — confirmed live 2026-04-14
+- Bedrock generation (Claude 3 Haiku): still blocked — AWS Support case open
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
-- Bedrock access: BLOCKED — AWS Support case open
 - GitHub repo: jhubb88/aws-rag-chatbot
+- Phase 2 tag: v0.3-ingest (commit 61ee46e)
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 1 complete — deploy stack next session**
-- Next: `create-stack --capabilities CAPABILITY_NAMED_IAM`, verify resources, tag v0.2-infra
+- **Status: Phase 2 complete — query Lambda (Phase 3) next session**
+- Next: write `src/lambdas/query/handler.py`, wire API Gateway, deploy, smoke test Nebius path
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
