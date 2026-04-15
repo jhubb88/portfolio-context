@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-14
+Last updated: 2026-04-15
 
 ---
 
@@ -14,7 +14,7 @@ Last updated: 2026-04-14
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | Not deployed yet — Phase 2 complete, Phase 3 next | ⏳ In Progress |
+| RAG Knowledge Chatbot | http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html | ⏳ In Progress (Phase 4 done, retrieval tuning next) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -31,21 +31,25 @@ Last updated: 2026-04-14
 - Region: us-east-1
 - Stack: `rag-knowledge-chatbot` — live in us-east-1
 - S3 Bucket: `rag-chatbot-603509861186-dev`
-- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (MOCK — Phase 3 wires real Lambda)
+- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — Nebius Llama 3.3)
+- Frontend URL: `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
 - Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
+- Query Lambda: `rag-chatbot-query-dev` (deployed, live, multi-provider router)
 - Titan Embeddings v2: ✅ UNBLOCKED — confirmed live 2026-04-14
 - Bedrock generation (Claude 3 Haiku): still blocked — AWS Support case open
+- Nebius Llama 3.3-70B: ✅ LIVE generation path
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Phase 2 tag: v0.3-ingest (commit 61ee46e)
+- Tags: v0.3-ingest (Phase 2), v0.4-query (Phase 3), v0.5-frontend (Phase 4)
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 2 complete — query Lambda (Phase 3) next session**
-- Next: write `src/lambdas/query/handler.py`, wire API Gateway, deploy, smoke test Nebius path
+- **Status: Phase 4 complete — three-panel analyst console live on S3 (HTTP)**
+- Next: retrieval tuning (re-chunk at 150–200 words, re-embed, target top score > 0.40)
+- Then: Phase 5 — CloudWatch observability dashboard + alarms + CloudFront (HTTPS)
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
