@@ -14,7 +14,7 @@ Last updated: 2026-04-16
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html | ⏳ In Progress (Phase 4 done, retrieval tuning next) |
+| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Phase 5 complete) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -32,27 +32,30 @@ Last updated: 2026-04-16
 - Stack: `rag-knowledge-chatbot` — live in us-east-1
 - S3 Bucket: `rag-chatbot-603509861186-dev`
 - API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — Nebius Llama 3.3)
-- Frontend URL: `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
+- Frontend URL (CloudFront): `https://d1r1qv7io7k8vk.cloudfront.net` (distribution EN88LEBW14923)
+- Frontend URL (S3 raw): `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
 - Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
 - Query Lambda: `rag-chatbot-query-dev` (deployed, live, multi-provider router)
 - Titan Embeddings v2: ✅ UNBLOCKED — confirmed live 2026-04-14
-- Bedrock generation (Claude 3 Haiku): still blocked — AWS Support case open
+- Bedrock generation: ✅ Model migrated to `us.anthropic.claude-haiku-4-5-20251001-v1:0` (cross-region inference profile); smoke test pending marketplace propagation
 - Nebius Llama 3.3-70B: ✅ LIVE generation path
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Tags: v0.3-ingest (Phase 2), v0.4-query (Phase 3), v0.5-frontend (Phase 4), v0.6-retrieval-tuning (retrieval tuning)
+- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability
 - Chunk size: 175 words (down from 500); index has 43 chunks
 - Curated knowledge files: data/curated/ (project_index.txt, project_summary.txt, work_history.txt, work_history_index.txt)
 - Top retrieval scores: project queries 0.4179, employment queries 0.4047–0.4820
-- Model migration TODO: query Lambda uses claude-3-haiku EOL 2026-09-10; replacement is claude-haiku-4-5-20251001-v1:0
+- CloudWatch dashboard: `RAG-Chatbot-Dashboard` (4 widgets)
+- CloudWatch alarms: `rag-chatbot-error-rate-dev` (>5%), `rag-chatbot-p95-duration-dev` (>10s) — both OK
+- SNS topic: `RAG-Chatbot-Alerts-dev` → jimmy.hubbard0813@gmail.com (confirm subscription email)
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Retrieval tuning complete (v0.6) — all target queries scoring above 0.40**
-- Next: Phase 5 — CloudWatch observability dashboard + alarms + CloudFront (HTTPS)
+- **Status: Phase 5 complete (v0.7) — CloudWatch, alarms, SNS, CloudFront, model migration**
+- Next: Bedrock smoke test (marketplace propagation), then Phase 6 (integration testing)
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
