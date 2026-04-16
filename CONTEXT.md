@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-15
+Last updated: 2026-04-16
 
 ---
 
@@ -40,16 +40,19 @@ Last updated: 2026-04-15
 - Nebius Llama 3.3-70B: ✅ LIVE generation path
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Tags: v0.3-ingest (Phase 2), v0.4-query (Phase 3), v0.5-frontend (Phase 4)
+- Tags: v0.3-ingest (Phase 2), v0.4-query (Phase 3), v0.5-frontend (Phase 4), v0.6-retrieval-tuning (retrieval tuning)
+- Chunk size: 175 words (down from 500); index has 43 chunks
+- Curated knowledge files: data/curated/ (project_index.txt, project_summary.txt, work_history.txt, work_history_index.txt)
+- Top retrieval scores: project queries 0.4179, employment queries 0.4047–0.4820
+- Model migration TODO: query Lambda uses claude-3-haiku EOL 2026-09-10; replacement is claude-haiku-4-5-20251001-v1:0
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 4 complete — three-panel analyst console live on S3 (HTTP)**
-- Next: retrieval tuning (re-chunk at 150–200 words, re-embed, target top score > 0.40)
-- Then: Phase 5 — CloudWatch observability dashboard + alarms + CloudFront (HTTPS)
+- **Status: Retrieval tuning complete (v0.6) — all target queries scoring above 0.40**
+- Next: Phase 5 — CloudWatch observability dashboard + alarms + CloudFront (HTTPS)
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
