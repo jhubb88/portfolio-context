@@ -54,9 +54,13 @@ Last updated: 2026-04-17
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 8.5 complete (v1.0-multikb) — multi-KB, EventBridge warm-up, mobile responsive layout**
+- **Status: Phase 8.5 complete + post-v1.0 fixes + prompt tuning shipped**
+- Both providers now have instruction-tuned system prompts: Bedrock (concision, 2–3 paragraphs, commit `4768755`), Nebius (no "according to the context" tic, natural synthesis, commit `25d4c7d`)
+- max_tokens asymmetric: Bedrock 384, Nebius 256. Warm baseline: Bedrock 2.8–4.9s, Nebius 3–9s.
+- Curated content rewrite: "Why hire Jimmy" section in `about_jimmy.txt` rewritten to focused 3-sentence pitch; re-ingested (index 2,027 chunks)
+- Two frontend bugs fixed: ghost `handleSubmit()` ReferenceError (e14b447), AbortController race on Clear Session (04e88d6)
 - Advanced Projects card updated: LIVE DEMO + ARCHITECTURE buttons live at https://d2uisqfxjzeo6a.cloudfront.net
-- Next: Phase 8.6 / Phase 9 candidates — horizontal scroll fix, query vocabulary gap, index format optimization
+- Next (Phase 9): curated content audit (rewrite other about_jimmy sections), horizontal scroll fix, query vocabulary gap, index format optimization
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
