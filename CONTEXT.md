@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-16
+Last updated: 2026-04-17
 
 ---
 
@@ -14,7 +14,7 @@ Last updated: 2026-04-16
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Phase 5 complete) |
+| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Phase 8.5 complete — multi-KB, mobile responsive) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -31,31 +31,32 @@ Last updated: 2026-04-16
 - Region: us-east-1
 - Stack: `rag-knowledge-chatbot` — live in us-east-1
 - S3 Bucket: `rag-chatbot-603509861186-dev`
-- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — Nebius Llama 3.3)
+- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — Nebius Llama 3.3 + Bedrock Claude Haiku 4.5)
 - Frontend URL (CloudFront): `https://d1r1qv7io7k8vk.cloudfront.net` (distribution EN88LEBW14923)
 - Frontend URL (S3 raw): `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
 - Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
-- Query Lambda: `rag-chatbot-query-dev` (deployed, live, multi-provider router)
-- Titan Embeddings v2: ✅ UNBLOCKED — confirmed live 2026-04-14
-- Bedrock generation: ✅ Model migrated to `us.anthropic.claude-haiku-4-5-20251001-v1:0` (cross-region inference profile); smoke test pending marketplace propagation
+- Query Lambda: `rag-chatbot-query-dev` (deployed, live, 1024MB, multi-provider router, module-level index caching)
+- Titan Embeddings v2: ✅ LIVE
+- Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — default provider on page load
 - Nebius Llama 3.3-70B: ✅ LIVE generation path
+- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min, eliminates cold starts
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability
-- Chunk size: 175 words (down from 500); index has 43 chunks
-- Curated knowledge files: data/curated/ (project_index.txt, project_summary.txt, work_history.txt, work_history_index.txt)
-- Top retrieval scores: project queries 0.4179, employment queries 0.4047–0.4820
+- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb
+- Vector index: 2,027 chunks (jimmy_background: 43 + curated; aws_well_architected: 1,974) at ~58MB
+- Knowledge bases: Jimmy's background + AWS Well-Architected Framework (6 pillar whitepapers)
 - CloudWatch dashboard: `RAG-Chatbot-Dashboard` (4 widgets)
-- CloudWatch alarms: `rag-chatbot-error-rate-dev` (>5%), `rag-chatbot-p95-duration-dev` (>10s) — both OK
-- SNS topic: `RAG-Chatbot-Alerts-dev` → jimmy.hubbard0813@gmail.com (confirm subscription email)
+- CloudWatch alarms: `rag-chatbot-error-rate-dev` (>5%), `rag-chatbot-p95-duration-dev` (>12s) — both OK
+- SNS topic: `RAG-Chatbot-Alerts-dev` → jimmy.hubbard0813@gmail.com ✅ confirmed
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 5 complete (v0.7) — CloudWatch, alarms, SNS, CloudFront, model migration**
-- Next: Bedrock smoke test (marketplace propagation), then Phase 6 (integration testing)
+- **Status: Phase 8.5 complete (v1.0-multikb) — multi-KB, EventBridge warm-up, mobile responsive layout**
+- Advanced Projects card updated: LIVE DEMO + ARCHITECTURE buttons live at https://d2uisqfxjzeo6a.cloudfront.net
+- Next: Phase 8.6 / Phase 9 candidates — horizontal scroll fix, query vocabulary gap, index format optimization
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
