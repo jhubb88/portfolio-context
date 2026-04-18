@@ -39,7 +39,7 @@ Last updated: 2026-04-17
 - Titan Embeddings v2: ✅ LIVE
 - Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — default provider on page load
 - Nebius Llama 3.3-70B: ✅ LIVE generation path
-- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min, eliminates cold starts
+- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch also sends synthetic Nebius ping (commit `b36c69c`) to keep Nebius inference endpoint warm
 - SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
 - GitHub repo: jhubb88/aws-rag-chatbot
 - Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb
@@ -61,7 +61,8 @@ Last updated: 2026-04-17
 - Two frontend bugs fixed: ghost `handleSubmit()` ReferenceError (e14b447), AbortController race on Clear Session (04e88d6)
 - Advanced Projects card updated: LIVE DEMO + ARCHITECTURE buttons live at https://d2uisqfxjzeo6a.cloudfront.net
 - Next (Phase 9): curated content audit (rewrite other about_jimmy sections), horizontal scroll fix, query vocabulary gap, index format optimization
-- Retrieval diagnosis 2026-04-18: top_k=3 blocking correct projects-list answer. Fix candidate identified (top_k 3→5). Status: open.
+- 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
+- 2026-04-18: Nebius warmup ping deployed in query Lambda (commit `b36c69c`). Reduces first-call median by ~33%, worst-case by ~58%, collapses variance from 11.76s to 1.46s. Fires every 5 min via EventBridge.
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
