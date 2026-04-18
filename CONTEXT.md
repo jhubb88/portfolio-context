@@ -61,6 +61,7 @@ Last updated: 2026-04-17
 - Two frontend bugs fixed: ghost `handleSubmit()` ReferenceError (e14b447), AbortController race on Clear Session (04e88d6)
 - Advanced Projects card updated: LIVE DEMO + ARCHITECTURE buttons live at https://d2uisqfxjzeo6a.cloudfront.net
 - Next (Phase 9): curated content audit (rewrite other about_jimmy sections), horizontal scroll fix, query vocabulary gap, index format optimization
+- Retrieval diagnosis 2026-04-18: top_k=3 blocking correct projects-list answer. Fix candidate identified (top_k 3→5). Status: open.
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
