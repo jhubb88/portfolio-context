@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-17
+Last updated: 2026-04-19
 
 ---
 
@@ -14,7 +14,7 @@ Last updated: 2026-04-17
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Phase 8.5 complete — multi-KB, mobile responsive) |
+| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (SambaNova swap complete — multi-KB, dual-provider, mobile responsive) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -31,16 +31,16 @@ Last updated: 2026-04-17
 - Region: us-east-1
 - Stack: `rag-knowledge-chatbot` — live in us-east-1
 - S3 Bucket: `rag-chatbot-603509861186-dev`
-- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — Nebius Llama 3.3 + Bedrock Claude Haiku 4.5)
+- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — SambaNova Llama 3.3 + Bedrock Claude Haiku 4.5)
 - Frontend URL (CloudFront): `https://d1r1qv7io7k8vk.cloudfront.net` (distribution EN88LEBW14923)
 - Frontend URL (S3 raw): `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
 - Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
 - Query Lambda: `rag-chatbot-query-dev` (deployed, live, 1024MB, multi-provider router, module-level index caching)
 - Titan Embeddings v2: ✅ LIVE
 - Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — default provider on page load
-- Nebius Llama 3.3-70B: ✅ LIVE generation path
-- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch also sends synthetic Nebius ping (commit `b36c69c`) to keep Nebius inference endpoint warm
-- SSM: Nebius API key stored at /rag-chatbot/nebius-api-key
+- SambaNova Llama 3.3-70B: ✅ LIVE generation path (Provider B, swapped from Nebius 2026-04-19)
+- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch sends synthetic SambaNova ping (~631ms) to keep inference endpoint warm
+- SSM: SambaNova API key at /rag-chatbot/sambanova-api-key (active); Nebius key at /rag-chatbot/nebius-api-key (dormant rollback — do not delete before 2026-05-19)
 - GitHub repo: jhubb88/aws-rag-chatbot
 - Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb
 - Vector index: 2,027 chunks (jimmy_background: 43 + curated; aws_well_architected: 1,974) at ~58MB
@@ -54,15 +54,13 @@ Last updated: 2026-04-17
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: Phase 8.5 complete + post-v1.0 fixes + prompt tuning shipped**
-- Both providers now have instruction-tuned system prompts: Bedrock (concision, 2–3 paragraphs, commit `4768755`), Nebius (no "according to the context" tic, natural synthesis, commit `25d4c7d`)
-- max_tokens asymmetric: Bedrock 384, Nebius 256. Warm baseline: Bedrock 2.8–4.9s, Nebius 3–9s.
-- Curated content rewrite: "Why hire Jimmy" section in `about_jimmy.txt` rewritten to focused 3-sentence pitch; re-ingested (index 2,027 chunks)
-- Two frontend bugs fixed: ghost `handleSubmit()` ReferenceError (e14b447), AbortController race on Clear Session (04e88d6)
-- Advanced Projects card updated: LIVE DEMO + ARCHITECTURE buttons live at https://d2uisqfxjzeo6a.cloudfront.net
-- Next (Phase 9): curated content audit (rewrite other about_jimmy sections), horizontal scroll fix, query vocabulary gap, index format optimization
+- **Status: SambaNova provider swap complete (2026-04-19)**
+- Both providers instruction-tuned: Bedrock (concision, 2–3 paragraphs, `max_tokens=384`), SambaNova/Llama (`max_tokens=256`, natural synthesis)
+- Warm baseline (measured 2026-04-19): Bedrock 2.8–4.9s, SambaNova 2.5–3.1s. First-call after idle: Bedrock 4.86s, SambaNova 5.66s. Latency is comparable; Bedrock remains default because it produces ~2-3x longer biographical answers with more specific citations.
+- 2026-04-19: Provider B swapped Nebius → SambaNova (commits `8879df9`, `4be78af`, `3cc3f87`). Root cause: Nebius warmup was timing out at 20s, breaching the 12s p95 alarm. SambaNova warmup completes in ~631ms. p95 alarm resolved.
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
-- 2026-04-18: Nebius warmup ping deployed in query Lambda (commit `b36c69c`). Reduces first-call median by ~33%, worst-case by ~58%, collapses variance from 11.76s to 1.46s. Fires every 5 min via EventBridge.
+- Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
+- Next (Phase 9): index format optimization (JSON→NumPy), ingest path normalization, response streaming, curated content narrative rewrite
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
