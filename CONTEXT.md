@@ -39,10 +39,10 @@ Last updated: 2026-04-19
 - Titan Embeddings v2: ✅ LIVE
 - Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — default provider on page load
 - SambaNova Llama 3.3-70B: ✅ LIVE generation path (Provider B, swapped from Nebius 2026-04-19)
-- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch sends synthetic SambaNova ping (~631ms) to keep inference endpoint warm
+- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch primes S3 index cache + fires synthetic SambaNova ping (3s timeout); REPORT ~250ms–4s
 - SSM: SambaNova API key at /rag-chatbot/sambanova-api-key (active); Nebius key at /rag-chatbot/nebius-api-key (dormant rollback — do not delete before 2026-05-19)
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb
+- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb, v1.1-sambanova
 - Vector index: 2,027 chunks (jimmy_background: 43 + curated; aws_well_architected: 1,974) at ~58MB
 - Knowledge bases: Jimmy's background + AWS Well-Architected Framework (6 pillar whitepapers)
 - CloudWatch dashboard: `RAG-Chatbot-Dashboard` (4 widgets)
@@ -56,8 +56,8 @@ Last updated: 2026-04-19
 ### RAG Knowledge Chatbot
 - **Status: SambaNova provider swap complete (2026-04-19)**
 - Both providers instruction-tuned: Bedrock (concision, 2–3 paragraphs, `max_tokens=384`), SambaNova/Llama (`max_tokens=256`, natural synthesis)
-- Latency (steady-state): Bedrock ~3–8s warm (service variance), SambaNova ~2.5–5s warm, ~5–6s first-call-after-idle. Bedrock remains default because it produces ~2-3x longer biographical answers with more specific citations.
-- 2026-04-19: Provider B swapped Nebius → SambaNova (commits `8879df9`, `4be78af`, `3cc3f87`). Root cause: Nebius warmup was timing out at 20s, breaching the 12s p95 alarm. SambaNova warmup completes in ~631ms. p95 alarm resolved.
+- Latency (steady-state): Bedrock ~3–8s warm, SambaNova ~2.5–5s warm; first-touch cold ~4.7s Lambda (index pre-warmed by warmup ping). Bedrock default: ~2-3x longer biographical answers with more specific citations.
+- 2026-04-19: Provider B swapped Nebius → SambaNova (commits `8879df9`, `4be78af`, `3cc3f87`). Warmup hardening: index cache priming + 3s SambaNova timeout (commit `87e1e21`) — first-touch cold 8.3s → 4.7s Lambda, p95 alarm stable.
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
 - Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
 - Next (Phase 9): index format optimization (JSON→NumPy), ingest path normalization, response streaming, curated content narrative rewrite
