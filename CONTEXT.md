@@ -56,7 +56,7 @@ Last updated: 2026-04-19
 ### RAG Knowledge Chatbot
 - **Status: SambaNova provider swap complete (2026-04-19)**
 - Both providers instruction-tuned: Bedrock (concision, 2–3 paragraphs, `max_tokens=384`), SambaNova/Llama (`max_tokens=256`, natural synthesis)
-- Warm baseline (measured 2026-04-19): Bedrock 2.8–4.9s, SambaNova 2.5–3.1s. First-call after idle: Bedrock 4.86s, SambaNova 5.66s. Latency is comparable; Bedrock remains default because it produces ~2-3x longer biographical answers with more specific citations.
+- Latency (steady-state): Bedrock ~3–8s warm (service variance), SambaNova ~2.5–5s warm, ~5–6s first-call-after-idle. Bedrock remains default because it produces ~2-3x longer biographical answers with more specific citations.
 - 2026-04-19: Provider B swapped Nebius → SambaNova (commits `8879df9`, `4be78af`, `3cc3f87`). Root cause: Nebius warmup was timing out at 20s, breaching the 12s p95 alarm. SambaNova warmup completes in ~631ms. p95 alarm resolved.
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
 - Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
