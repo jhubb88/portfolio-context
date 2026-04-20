@@ -31,6 +31,15 @@ Grid order as of 2026-04-19:
 6. Text to Audio
 
 - 2026-04-19: Renamed position-1 card "Advanced Projects" → "Cloud & AI Systems (AWS)", moved from pos 4 → pos 1, icon 🚀 → ☁️, blurb rewritten to surface AWS/Bedrock/Lambda/API Gateway/SambaNova keywords. Detail panel `<h4>` and `<p>` updated to match. `data-project="advanced-projects"` attribute, `#desc-advanced-projects` ID, and destination CloudFront URL were intentionally NOT changed — click-wiring JS depends on them.
+- 2026-04-19 (later same day, 5 follow-up changes after commit b7accbf):
+  - Wired LIVE APP pills on 5 cards (ntcip-simulator, traffic-dashboard, log-analyzer, resume-matcher, text-to-audio) to open their app URLs directly in a new tab via `onclick="event.stopPropagation(); window.open(url, '_blank', 'noopener');"`. Pills kept as `<div class="tag">` (not `<a>`) per wpautop constraint.
+  - Added DETAILS → button on same 5 cards inside a new `<div class="card-actions">` wrapper. DETAILS button has no onclick — relies on event bubbling to existing card-level click handler, which opens the detail panel. New CSS added for `.project-card .card-actions` (flex row, gap 8px, justify-content center, flex-wrap) and `.project-card .tag.tag-details` (transparent background, 2px rgba(255,255,255,0.3) border, light text, padding 2px 12px) plus hover state.
+  - Bottom-aligned action rows across all 6 cards: changed `.project-card .card-actions` margin-top from 14px to `auto`. This pins buttons to the bottom of each card regardless of blurb length (Text to Audio previously floated higher due to shorter blurb).
+  - Wrapped Cloud & AI Systems card's bare LIVE APP pill in `<div class="card-actions">` for structural consistency with other 5 cards.
+  - Removed duplicate unscoped `.card-actions` and `.card-actions .tag` CSS rules (hygiene — they were dead duplicates of the `.project-card`-prefixed versions).
+  - Simplified Cloud & AI Systems card (Fix 2): added `onclick` to its LIVE APP pill (same pattern, URL = https://d2uisqfxjzeo6a.cloudfront.net). Added branch to card-level click handler so clicking the Cloud & AI card background navigates directly to Advanced Projects page instead of opening a (now-removed) detail panel. Deleted the entire `<div class="project-desc" id="desc-advanced-projects">` block. Rationale: that panel had no unique content — only an "Explore Projects →" button pointing to the same URL. Dead layer removed.
+
+  Net result: all 6 cards now have two click paths that each lead somewhere useful. LIVE APP → direct to app (new tab). Card background → detail panel on 5 cards, direct to Advanced Projects on Cloud & AI. DETAILS → button exists only on the 5 cards that have detail panels worth opening.
 
 ### AWS Infrastructure (Log Analyzer)
 - Lambda: `jimmy-log-analyzer` (python3.12, 30s timeout, Anthropic API)
@@ -79,6 +88,13 @@ Grid order as of 2026-04-19:
 - Rename page header on Advanced Projects hosted app (https://d2uisqfxjzeo6a.cloudfront.net) from "Advanced Projects" → "Cloud & AI Systems" to match the renamed entry card on the Projects grid
 - Handled in the separate "Advanced Projects" CC chat, not the Projects-grid chat
 - Rationale: card on Projects grid now reads "Cloud & AI Systems (AWS)" — destination page header should match to avoid recruiter-facing naming mismatch
+
+### Projects Page Full Visual Redesign
+- **Status: NOT STARTED**
+- Goal: Unify visual language between Projects page and Advanced Projects page. Currently the Projects page uses a light/beige background while the Advanced page is pure black with terminal-style grid. Pages feel like they belong to different sites.
+- Scope: background + palette + typography unification on Projects page to match Advanced page DNA. Keep card layout, emoji icons, button structure — only change the wrapper/theme.
+- Approach: one visual change per CC prompt (background first, then palette, then typography). Do NOT bundle everything into one PATCH.
+- Trigger: handled in a dedicated chat after 2026-04-20 Advanced page header rename is complete.
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
