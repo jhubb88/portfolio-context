@@ -13,13 +13,24 @@ Last updated: 2026-04-19
 | Text to Audio | https://d2ey5cipu3t9y.cloudfront.net | Live, HTTPS ✅ |
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
-| Advanced Projects | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
+| Advanced Projects (linked from "Cloud & AI Systems (AWS)" card on Projects page) | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
 | RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (SambaNova swap complete — multi-KB, dual-provider, mobile responsive; iPad Safari freeze after Clear Session is a known deferred issue) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
 - All 6 active projects have CloudFront distributions provisioned
 - WordPress Projects page updated with CloudFront URLs (no S3 URLs remain)
+
+### WordPress Projects Page (Page ID 43) — Layout
+Grid order as of 2026-04-19:
+1. Cloud & AI Systems (AWS) → links to https://d2uisqfxjzeo6a.cloudfront.net (Advanced Projects hosted app)
+2. NTCIP Traffic Controller Simulator (TCS)
+3. Live Traffic Dashboard
+4. Log Analyzer
+5. AI Resume ↔ Job Matcher
+6. Text to Audio
+
+- 2026-04-19: Renamed position-1 card "Advanced Projects" → "Cloud & AI Systems (AWS)", moved from pos 4 → pos 1, icon 🚀 → ☁️, blurb rewritten to surface AWS/Bedrock/Lambda/API Gateway/SambaNova keywords. Detail panel `<h4>` and `<p>` updated to match. `data-project="advanced-projects"` attribute, `#desc-advanced-projects` ID, and destination CloudFront URL were intentionally NOT changed — click-wiring JS depends on them.
 
 ### AWS Infrastructure (Log Analyzer)
 - Lambda: `jimmy-log-analyzer` (python3.12, 30s timeout, Anthropic API)
@@ -62,6 +73,12 @@ Last updated: 2026-04-19
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
 - Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
 - Next (Phase 9): index format optimization (JSON→NumPy), ingest path normalization, response streaming, curated content narrative rewrite
+
+### Advanced Projects Page Header Rename
+- **Status: PENDING (scheduled for 2026-04-20)**
+- Rename page header on Advanced Projects hosted app (https://d2uisqfxjzeo6a.cloudfront.net) from "Advanced Projects" → "Cloud & AI Systems" to match the renamed entry card on the Projects grid
+- Handled in the separate "Advanced Projects" CC chat, not the Projects-grid chat
+- Rationale: card on Projects grid now reads "Cloud & AI Systems (AWS)" — destination page header should match to avoid recruiter-facing naming mismatch
 
 ### Custom Domain via CloudFront
 - **Status: NOT STARTED**
