@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-19
+Last updated: 2026-04-20
 
 ---
 
@@ -40,6 +40,37 @@ Grid order as of 2026-04-19:
   - Simplified Cloud & AI Systems card (Fix 2): added `onclick` to its LIVE APP pill (same pattern, URL = https://d2uisqfxjzeo6a.cloudfront.net). Added branch to card-level click handler so clicking the Cloud & AI card background navigates directly to Advanced Projects page instead of opening a (now-removed) detail panel. Deleted the entire `<div class="project-desc" id="desc-advanced-projects">` block. Rationale: that panel had no unique content — only an "Explore Projects →" button pointing to the same URL. Dead layer removed.
 
   Net result: all 6 cards now have two click paths that each lead somewhere useful. LIVE APP → direct to app (new tab). Card background → detail panel on 5 cards, direct to Advanced Projects on Cloud & AI. DETAILS → button exists only on the 5 cards that have detail panels worth opening.
+
+- 2026-04-20 — Projects page visual pass (2 of 3 changes shipped):
+  - **Change #1 — Detail Panel Restyle (SHIPPED)**
+    - Target: `.project-desc` (5 panels: desc-ntcip-simulator, desc-traffic-dashboard, desc-log-analyzer, desc-resume-matcher, desc-text-to-audio)
+    - CSS before: `background: #f8f9fc; border-left: 4px solid #e94560; border-radius: 0 12px 12px 0; padding: 24px 28px`
+    - CSS after: `background: #fafaf7; border: 1px solid #e5e0d6; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(26,26,46,0.08)`
+    - Added rule: `.project-desc h4 .panel-label { color: #6b6b6b; font-weight: 500; margin-right: 4px; }` — styles the "About:" label prefix in each panel h4
+    - HTML: wrapped "About:" in each of the 5 `<h4>` elements with `<span class="panel-label">`
+    - Also edited 5 `.waf-section` inline styles: `border-top: 2px solid #e2e8f0` → `border-top: 1px solid #e5e0d6` to match new warm palette
+    - No `!important` used — inline styles edited at source
+  - **Change #2 — Page Header Treatment (DEFERRED)**
+    - Initial intent: restyle the "Projects" h1 to feel intentional (plain black, weight 600, 36px — reads as WP default)
+    - Discovery: header is a site-wide WP block post-title (`wp-block-post-title has-large-font-size`) rendered the same way on Home, Resume, About, Contact. Changing it on Page 43 only would either be overridden by theme specificity or create cross-page inconsistency.
+    - CC proposed three treatment options (weight+accent with pink underline, oversized editorial, dual-tone split). No option selected — owner deferred the entire header treatment pending a site-wide evaluation across Home/Projects/Resume/About/Contact.
+    - Decision: defer to a dedicated site-wide theme-level effort evaluating all 5 page titles simultaneously
+  - **Change #3 — Cloud & AI Card EXPLORE Badge (SHIPPED)**
+    - Target: `[data-project="advanced-projects"]` card only — no other card touched
+    - Added `[data-project="advanced-projects"] { position: relative; }` — scoped, not applied to global `.project-card`
+    - Added `.explore-badge { position: absolute; top: 12px; right: 12px; background: transparent; border: 1px solid #a8dadc; color: #a8dadc; font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; }`
+    - Added HTML: `<span class="explore-badge">EXPLORE →</span>` as first child of Cloud & AI card div
+    - Color `#a8dadc` reused from `.waf-btn` (architecture pills inside detail panels) — no new palette color introduced
+    - Click: badge inherits the card's existing click-to-navigate handler; `cursor: pointer` reflects actual behavior
+  - **Design decisions recorded:**
+    - Kept two distinct aesthetics (Projects = card grid portfolio convention, Advanced = node graph deep-dive showcase). EXPLORE badge telegraphs the shift before clickthrough rather than forcing Projects page into terminal aesthetic.
+    - Chose Option B (elevated off-white panel `#fafaf7`) over Option A (dark navy matching cards) for detail panels — creates visual hierarchy: cards = project surface, panels = info layer.
+    - Badge only on Cloud & AI card (no outline/border combo) — badge alone carries both visual emphasis and behavioral differentiation. Outline would be redundant.
+    - Pink (`#e94560`) reserved as single-purpose CTA color (LIVE APP, DETAILS, Visit App). Cyan `#a8dadc` used for badge to avoid diluting pink's role.
+    - Retained click-anywhere-on-card behavior — badge is a signal, not a gate. Restricting clicks would break accessibility and punish imprecise clicks.
+  - **Open backlog items:**
+    - Site-wide page header treatment (Home/Projects/Resume/About/Contact — must be evaluated together)
+    - Detail panel: 4 architecture badges produce a 3+1 orphan row at bottom — count issue, not a styling bug. Defer unless owner flags it.
 
 ### AWS Infrastructure (Log Analyzer)
 - Lambda: `jimmy-log-analyzer` (python3.12, 30s timeout, Anthropic API)
