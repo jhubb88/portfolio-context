@@ -1,5 +1,5 @@
 # Project Context — jimmyhubbard2.cc Portfolio
-Last updated: 2026-04-20
+Last updated: 2026-04-21
 
 ---
 
@@ -20,6 +20,25 @@ Last updated: 2026-04-20
 - Stack name: `jimmy-cloudfront-distributions`
 - All 6 active projects have CloudFront distributions provisioned
 - WordPress Projects page updated with CloudFront URLs (no S3 URLs remain)
+
+### CloudFront Distribution IDs & S3 Buckets
+
+| App | Distribution ID | S3 Bucket | CloudFront Domain |
+|-----|----------------|-----------|-------------------|
+| NTCIP Simulator | `E2PEIMT1J3W4MO` | `jimmy-ntcip-simulator` | d1r8pxnmau5sot.cloudfront.net |
+| Live Traffic Dashboard | `E3H1V6C42HG9P1` | `jimmy-traffic-dashboard` | d1t5py05a4uugi.cloudfront.net |
+| Text to Audio | `E1BM7FLW1T9GAM` | `jimmy-text-to-audio` | d2ey5cipu3t9y.cloudfront.net |
+| AI Log Analyzer | `E3Q8ZCVRAS854T` | `jimmy-log-analyzer` | dn6duxmzpvyau.cloudfront.net |
+| AI Resume Matcher | `E3H0XAJDR3BQG1` | `jimmy-resume-matcher` | d3t6z67os7y9is.cloudfront.net |
+| Advanced Projects | `E1VZ0ELKDC3LN0` | `jimmy-advanced-projects` | d2uisqfxjzeo6a.cloudfront.net |
+| FieldIQ | `E12Z80TRB0P2XR` | `jimmy-fieldiq` | d1q3x6tsvbllgg.cloudfront.net |
+| RAG Chatbot | `EN88LEBW14923` | `rag-chatbot-603509861186-dev` | d1r1qv7io7k8vk.cloudfront.net |
+
+### Favicons (2026-04-21)
+- All 6 portfolio apps have a full favicon set: `favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
+- All favicon files live at the repo/S3 root (not in a subdirectory)
+- Standard `<link>` block inserted in each `index.html` after viewport `<meta>`, before `<title>`
+- NTCIP Simulator: also updated `manifest.json` and `sw.js` (PWA) to point at root-level icons; SW cache bumped `ntcip-sim-v1` → `ntcip-sim-v2`; dead `icons/` directory removed
 
 ### WordPress Projects Page (Page ID 43) — Layout
 Grid order as of 2026-04-19:
@@ -146,6 +165,7 @@ Grid order as of 2026-04-19:
 | Text to Audio | jhubb88/text-to-audio | Desktop/Projects/text-to-audio/ |
 | AI Log Analyzer | jhubb88/log-analyzer | Desktop/Projects/log-analyzer/ |
 | AI Resume Matcher | jhubb88/resume-matcher | Desktop/Projects/resume-matcher/ |
+| FieldIQ | jhubb88/FieldIQ | Desktop/FieldIQ/ (note: NOT inside Projects/) |
 | RAG Knowledge Chatbot | jhubb88/aws-rag-chatbot | Desktop/Projects/rag-chatbot/ |
 | Portfolio Context | jhubb88/portfolio-context | Desktop/Projects/portfolio-context/ |
 | Website (WP snapshot) | jhubb88/Website | N/A |
