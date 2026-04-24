@@ -14,7 +14,7 @@ Last updated: 2026-04-21
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects (linked from "Cloud & AI Systems (AWS)" card on Projects page) | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (SambaNova swap complete — multi-KB, dual-provider, mobile responsive; iPad Safari freeze after Clear Session is a known deferred issue) |
+| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Bedrock-only framing on portfolio page as of 2026-04-24; live app still has SambaNova toggle until Option 3 ships; iPad Safari freeze after Clear Session is a known deferred issue) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -131,6 +131,7 @@ Grid order as of 2026-04-19:
 - 2026-04-19: iOS CSS fixes — iPhone input auto-zoom fix (16px font-size on mobile inputs, commit `77c7c82`), global `100dvh` fix for iOS viewport height mismatch. iPad Safari freeze after Clear Session investigated, not resolved, deferred as low-priority.
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
 - Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
+- 2026-04-24: Advanced-projects page re-scoped to Bedrock-only framing — summary, tags, keyPoints, and all 6 architecture modal sections rewritten. SambaNova toggle removal from the live RAG app is a separate future task (after Linux Ops Command Copilot ships).
 - Next (Phase 9): index format optimization (JSON→NumPy), ingest path normalization, response streaming, curated content narrative rewrite
 
 ### Advanced Projects Page Header Rename
