@@ -14,7 +14,7 @@ Last updated: 2026-04-21
 | AI Log Analyzer | https://dn6duxmzpvyau.cloudfront.net | Live, HTTPS ✅ |
 | AI Resume Matcher | https://d3t6z67os7y9is.cloudfront.net | Live, HTTPS ✅ |
 | Advanced Projects (linked from "Cloud & AI Systems (AWS)" card on Projects page) | https://d2uisqfxjzeo6a.cloudfront.net | Live, HTTPS ✅ |
-| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (Bedrock-only framing on portfolio page as of 2026-04-24; live app still has SambaNova toggle until Option 3 ships; iPad Safari freeze after Clear Session is a known deferred issue) |
+| RAG Knowledge Chatbot | https://d1r1qv7io7k8vk.cloudfront.net | Live, HTTPS ✅ (v1.2-bedrock-only shipped 2026-04-27 — SambaNova fully removed from frontend + Lambda; iPad Safari freeze after Clear Session is a known deferred issue) |
 
 ### CloudFront Stack
 - Stack name: `jimmy-cloudfront-distributions`
@@ -99,40 +99,40 @@ Grid order as of 2026-04-19:
 
 ### AWS Infrastructure (RAG Chatbot)
 - Region: us-east-1
-- Stack: `rag-knowledge-chatbot` — live in us-east-1
+- Stack: `rag-knowledge-chatbot` — live in us-east-1 (live stack; do NOT confuse with abandoned `rag-chatbot-dev` REVIEW_IN_PROGRESS shell)
 - S3 Bucket: `rag-chatbot-603509861186-dev`
-- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (live — SambaNova Llama 3.3 + Bedrock Claude Haiku 4.5)
+- API Endpoint: `https://uiauqskgv0.execute-api.us-east-1.amazonaws.com/dev/query` (Bedrock Claude Haiku 4.5 only as of v1.2)
 - Frontend URL (CloudFront): `https://d1r1qv7io7k8vk.cloudfront.net` (distribution EN88LEBW14923)
 - Frontend URL (S3 raw): `http://rag-chatbot-603509861186-dev.s3-website-us-east-1.amazonaws.com/frontend/index.html`
 - Ingest Lambda: `rag-chatbot-ingest-dev` (deployed, tested, confirmed working)
-- Query Lambda: `rag-chatbot-query-dev` (deployed, live, 1024MB, multi-provider router, module-level index caching)
+- Query Lambda: `rag-chatbot-query-dev` (Bedrock-only as of v1.2; 1024MB, module-level index caching)
 - Titan Embeddings v2: ✅ LIVE
-- Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — default provider on page load
-- SambaNova Llama 3.3-70B: ✅ LIVE generation path (Provider B, swapped from Nebius 2026-04-19)
-- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch primes S3 index cache + fires synthetic SambaNova ping (3s timeout); REPORT ~250ms–4s
-- SSM: SambaNova API key at /rag-chatbot/sambanova-api-key (active); Nebius key at /rag-chatbot/nebius-api-key (dormant rollback — do not delete before 2026-05-19)
+- Bedrock generation: ✅ `us.anthropic.claude-haiku-4-5-20251001-v1:0` — sole provider
+- EventBridge warm-up: `rag-chatbot-warmup-dev` — pings Lambda every 5 min; warmup branch primes S3 index cache only (no synthetic provider ping); REPORT 1–4ms warm, ~4s cold
+- SSM (DORMANT post-v1.2 — kept for rollback only): SambaNova key at /rag-chatbot/sambanova-api-key; Nebius key at /rag-chatbot/nebius-api-key (do not delete before 2026-05-19)
 - GitHub repo: jhubb88/aws-rag-chatbot
-- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb, v1.1-sambanova
+- Tags: v0.3-ingest, v0.4-query, v0.5-frontend, v0.6-retrieval-tuning, v0.7-observability, v0.8-integration, v0.9-polish, v1.0-multikb, v1.1-sambanova, v1.2-bedrock-only
 - Vector index: 2,027 chunks (jimmy_background: 43 + curated; aws_well_architected: 1,974) at ~58MB
 - Knowledge bases: Jimmy's background + AWS Well-Architected Framework (6 pillar whitepapers)
 - CloudWatch dashboard: `RAG-Chatbot-Dashboard` (4 widgets)
 - CloudWatch alarms: `rag-chatbot-error-rate-dev` (>5%), `rag-chatbot-p95-duration-dev` (>12s) — both OK
 - SNS topic: `RAG-Chatbot-Alerts-dev` → jimmy.hubbard0813@gmail.com ✅ confirmed
+- IaC drift: live stack `rag-knowledge-chatbot` has drifted from local template (parameters, env vars, missing warmup resources, stale Lambda code S3 reference). Phase 12 candidate — full inventory in `PROJECT_PLANNING_MULTICLOUD.md`. Until realigned, all infra changes via direct CLI, not `cloudformation update-stack`.
 
 ---
 
 ## In Progress / Next Steps
 
 ### RAG Knowledge Chatbot
-- **Status: SambaNova provider swap complete (2026-04-19)**
-- Both providers instruction-tuned: Bedrock (concision, 2–3 paragraphs, `max_tokens=384`), SambaNova/Llama (`max_tokens=256`, natural synthesis)
-- Latency (steady-state): Bedrock ~3–8s warm, SambaNova ~2.5–5s warm; first-touch cold ~4.7s Lambda (index pre-warmed by warmup ping). Bedrock default: ~2-3x longer biographical answers with more specific citations.
-- 2026-04-19: Provider B swapped Nebius → SambaNova (commits `8879df9`, `4be78af`, `3cc3f87`). Warmup hardening: index cache priming + 3s SambaNova timeout (commit `87e1e21`) — first-touch cold 8.3s → 4.7s Lambda, p95 alarm stable.
+- **Status: v1.2-bedrock-only shipped 2026-04-27** — SambaNova fully removed from frontend, Lambda, and live API response payload
+- Bedrock instruction-tuned: concision, 2–3 paragraphs, `max_tokens=384`
+- Latency (steady-state): warm 5–6s; first-touch cold ~4.7s Lambda (index pre-warmed by warmup ping)
+- 2026-04-27: Bedrock-only rework — frontend strip commit `430d8ab`, Lambda strip commit `636891c`, docs sweep commit `694dc09` tagged `v1.2-bedrock-only`. Frontend 1443→1347 lines, Lambda 468→300 lines, `engine_used` removed from API response. Rationale: SambaNova free-tier 20 RPD insufficient and Developer Tier auto-upgrade broken in their billing migration — community forum confirms widespread issue.
 - 2026-04-19: iOS CSS fixes — iPhone input auto-zoom fix (16px font-size on mobile inputs, commit `77c7c82`), global `100dvh` fix for iOS viewport height mismatch. iPad Safari freeze after Clear Session investigated, not resolved, deferred as low-priority.
-- 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss. Both providers now name all 7 projects.
-- Curated content: about_jimmy.txt and project_summary.txt updated for SambaNova; jimmy_background KB re-ingested (index 2,027 chunks)
-- 2026-04-24: Advanced-projects page re-scoped to Bedrock-only framing — summary, tags, keyPoints, and all 6 architecture modal sections rewritten. SambaNova toggle removal from the live RAG app is a separate future task (after Linux Ops Command Copilot ships).
-- Next (Phase 9): index format optimization (JSON→NumPy), ingest path normalization, response streaming, curated content narrative rewrite
+- 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss.
+- 2026-04-24: Advanced-projects page re-scoped to Bedrock-only framing — summary, tags, keyPoints, and all 6 architecture modal sections rewritten.
+- **Phase 12 deferred:** IaC drift realignment. Live `rag-knowledge-chatbot` CFN stack has drifted from local template across three axes (parameter names, Lambda env vars, missing warmup resources). Lambda code reference also stale (S3 zip is pre-v1.1; live Lambda runs Bedrock-only code via direct `update-function-code`). Functional behavior unaffected. Estimated 4–6 hour dedicated session. Full inventory in PROJECT_PLANNING_MULTICLOUD.md Phase 12 candidate.
+- Next active work: index format optimization (JSON→NumPy), ingest path normalization, response streaming
 
 ### Advanced Projects Page Header Rename
 - **Status: PENDING (scheduled for 2026-04-20)**
