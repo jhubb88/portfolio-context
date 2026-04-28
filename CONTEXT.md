@@ -117,7 +117,7 @@ Grid order as of 2026-04-19:
 - CloudWatch dashboard: `RAG-Chatbot-Dashboard` (4 widgets)
 - CloudWatch alarms: `rag-chatbot-error-rate-dev` (>5%), `rag-chatbot-p95-duration-dev` (>12s) — both OK
 - SNS topic: `RAG-Chatbot-Alerts-dev` → jimmy.hubbard0813@gmail.com ✅ confirmed
-- IaC drift: live stack `rag-knowledge-chatbot` has drifted from local template (parameters, env vars, missing warmup resources, stale Lambda code S3 reference). Phase 12 candidate — full inventory in `PROJECT_PLANNING_MULTICLOUD.md`. Until realigned, all infra changes via direct CLI, not `cloudformation update-stack`.
+- IaC drift: live stack `rag-knowledge-chatbot` has drifted from local template (parameters, env vars, missing warmup resources, stale Lambda code S3 reference). Phase 12 candidate — full inventory in `BUILD_LOG.md`. Until realigned, all infra changes via direct CLI, not `cloudformation update-stack`.
 
 ---
 
@@ -131,7 +131,7 @@ Grid order as of 2026-04-19:
 - 2026-04-19: iOS CSS fixes — iPhone input auto-zoom fix (16px font-size on mobile inputs, commit `77c7c82`), global `100dvh` fix for iOS viewport height mismatch. iPad Safari freeze after Clear Session investigated, not resolved, deferred as low-priority.
 - 2026-04-18: top_k raised 3→5 (commit `b30b6ab`) — fixes projects-list retrieval miss.
 - 2026-04-24: Advanced-projects page re-scoped to Bedrock-only framing — summary, tags, keyPoints, and all 6 architecture modal sections rewritten.
-- **Phase 12 deferred:** IaC drift realignment. Live `rag-knowledge-chatbot` CFN stack has drifted from local template across three axes (parameter names, Lambda env vars, missing warmup resources). Lambda code reference also stale (S3 zip is pre-v1.1; live Lambda runs Bedrock-only code via direct `update-function-code`). Functional behavior unaffected. Estimated 4–6 hour dedicated session. Full inventory in PROJECT_PLANNING_MULTICLOUD.md Phase 12 candidate.
+- **Phase 12 deferred:** IaC drift realignment. Live `rag-knowledge-chatbot` CFN stack has drifted from local template across three axes (parameter names, Lambda env vars, missing warmup resources). Lambda code reference also stale (S3 zip is pre-v1.1; live Lambda runs Bedrock-only code via direct `update-function-code`). Functional behavior unaffected. Estimated 4–6 hour dedicated session. Full inventory in BUILD_LOG.md Phase 12 candidate.
 - Next active work: index format optimization (JSON→NumPy), ingest path normalization, response streaming
 
 ### Advanced Projects Page Header Rename
