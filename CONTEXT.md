@@ -46,7 +46,8 @@ Originally a single workflow in `jhubb88/ClaudeCode/.github/workflows/deploy.yml
 
 - **Advanced Projects (fixed 2026-04-30):** `jhubb88/advanced-projects/.github/workflows/deploy.yml` — push to main → `aws s3 cp index.html s3://jimmy-advanced-projects/index.html` → invalidate `E1VZ0ELKDC3LN0`.
 - **Text to Audio (fixed 2026-05-01):** `jhubb88/text-to-audio/.github/workflows/deploy.yml` — push to main → `aws s3 sync . s3://jimmy-text-to-audio/ --delete` (excludes `.git/*`, `.github/*`, `*.md`, `LICENSE`, `.gitignore`) → invalidate `E1BM7FLW1T9GAM`. README deploy section also updated to reflect CI/CD.
-- **Pending same fix:** log-analyzer, resume-matcher, traffic-dashboard, ntcip-simulator (still deploy from stale stubs in ClaudeCode).
+- **AI Log Analyzer (fixed 2026-05-01):** `jhubb88/log-analyzer/.github/workflows/deploy.yml` — push to main → `aws s3 sync . s3://jimmy-log-analyzer/ --delete` (excludes `.git/*`, `.github/*`, `*.md`, `LICENSE`, `.gitignore`, **`deploy.sh`, `lambda_function.py`** — backend artifacts kept off the frontend bucket) → invalidate `E3Q8ZCVRAS854T`. README frontend-sync block replaced with CI/CD note; `./deploy.sh` infrastructure block intact (backend setup not handled by the workflow).
+- **Pending same fix:** resume-matcher, traffic-dashboard, ntcip-simulator (still deploy from stale stubs in ClaudeCode).
 - **FieldIQ:** `jhubb88/FieldIQ/.github/workflows/prewarm.yml` — weekly Sunday 02:00 UTC + `workflow_dispatch`. NOT triggered on push, so commits between runs are silently undeployed until the next Sunday or manual dispatch.
 - **RAG Knowledge Chatbot:** no deploy workflow exists; S3 last touched 2026-04-19 (predates frontend "Generating answer" polish in `1cc5ccc`).
 - **Linux Ops Command Copilot:** no deploy workflow; last manual deploy 2026-04-27 (currently in sync, but no automation).
