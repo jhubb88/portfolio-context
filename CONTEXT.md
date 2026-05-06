@@ -161,12 +161,29 @@ Grid order as of 2026-04-19:
 - Approach: one visual change per CC prompt (background first, then palette, then typography). Do NOT bundle everything into one PATCH.
 - Trigger: handled in a dedicated chat after 2026-04-20 Advanced page header rename is complete.
 
-### Custom Domain via CloudFront
-- **Status: NOT STARTED**
-- Goal: Wire jimmyhubbard2.cc subpaths or subdomains through CloudFront
-- DNS is on Namecheap
-- CloudFront distributions already live for all 6 projects
-- Requires: ACM cert, CloudFront alternate domain name config, Namecheap CNAME records
+### Subdomain Wiring
+- **Goal:** serve each portfolio project at `<project>.jimmyhubbard2.cc` over HTTPS via the existing CloudFront distributions (e.g. `fieldiq.jimmyhubbard2.cc`, `text-to-audio.jimmyhubbard2.cc`).
+
+#### Phase A — Wildcard ACM cert (DONE 2026-05-06)
+- **ARN:** `arn:aws:acm:us-east-1:603509861186:certificate/598151c8-e0e7-4b46-acf0-4da54e5bce38`
+- **Domains:** `*.jimmyhubbard2.cc` (CN) + `jimmyhubbard2.cc` (SAN)
+- **Region:** us-east-1 (required — CloudFront only accepts certs from us-east-1)
+- **Issuer:** Amazon (`AMAZON_ISSUED`), DNS validation
+- **Validity:** 2026-05-05 → 2026-11-19; ACM auto-renews 60 days before expiry as long as the validation CNAME stays in DNS
+- **InUseBy:** `[]` — not attached to any distribution yet (Phase B job)
+- **Tags:** `Project=portfolio`, `Purpose=wildcard-subdomains`
+- **Validation CNAME (must remain in cPanel — required for auto-renewal):**
+  - Name: `_ed2f0c446942352374e46625e44e1b7e.jimmyhubbard2.cc`
+  - Value: `_d8ab6fc367c43e33df38aa3a73677633.jkddzztszm.acm-validations.aws.`
+
+#### DNS quirk discovered during Phase A
+The domain's nameservers point to Namecheap **Web Hosting DNS** (`dns1.namecheaphosting.com`, `dns2.namecheaphosting.com`), not Namecheap BasicDNS. This means DNS records are managed in **cPanel Zone Editor**, not in the registrar's Advanced DNS panel — the registrar's panel is empty/non-functional for this domain. All future DNS changes (subdomain CNAMEs in Phase B, etc.) happen via cPanel.
+
+#### IAM permissions added to `portfolio-user` for Phase A
+ACM actions (no resource-level scoping possible on `RequestCertificate` — `Resource: *` required): `acm:RequestCertificate`, `acm:DescribeCertificate`, `acm:ListCertificates`, `acm:AddTagsToCertificate`, `acm:ListTagsForCertificate`. Phase B will likely need `cloudfront:UpdateDistribution` and `cloudfront:GetDistributionConfig` if not already present.
+
+#### Phase B (next)
+Attach the cert to each portfolio CloudFront distribution, add Alternate Domain Names (CNAMEs / aliases) on each, then add `<project>.jimmyhubbard2.cc` CNAME records in cPanel pointing to each distribution's `*.cloudfront.net` domain.
 
 ---
 
