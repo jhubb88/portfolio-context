@@ -179,11 +179,51 @@ Grid order as of 2026-04-19:
 #### DNS quirk discovered during Phase A
 The domain's nameservers point to Namecheap **Web Hosting DNS** (`dns1.namecheaphosting.com`, `dns2.namecheaphosting.com`), not Namecheap BasicDNS. This means DNS records are managed in **cPanel Zone Editor**, not in the registrar's Advanced DNS panel — the registrar's panel is empty/non-functional for this domain. All future DNS changes (subdomain CNAMEs in Phase B, etc.) happen via cPanel.
 
-#### IAM permissions added to `portfolio-user` for Phase A
-ACM actions (no resource-level scoping possible on `RequestCertificate` — `Resource: *` required): `acm:RequestCertificate`, `acm:DescribeCertificate`, `acm:ListCertificates`, `acm:AddTagsToCertificate`, `acm:ListTagsForCertificate`. Phase B will likely need `cloudfront:UpdateDistribution` and `cloudfront:GetDistributionConfig` if not already present.
+#### IAM permissions on `portfolio-user`
+ACM actions added 2026-05-06 for Phase A (no resource-level scoping possible on `RequestCertificate` — `Resource: *` required): `acm:RequestCertificate`, `acm:DescribeCertificate`, `acm:ListCertificates`, `acm:AddTagsToCertificate`, `acm:ListTagsForCertificate`. **Phase B confirmed `cloudfront:UpdateDistribution`, `cloudfront:GetDistributionConfig`, `cloudfront:ListDistributions`, `cloudfront:GetDistribution` are already present — no additional IAM needed for Phase B/C.**
 
-#### Phase B (next)
-Attach the cert to each portfolio CloudFront distribution, add Alternate Domain Names (CNAMEs / aliases) on each, then add `<project>.jimmyhubbard2.cc` CNAME records in cPanel pointing to each distribution's `*.cloudfront.net` domain.
+#### Phase B — FieldIQ subdomain (DONE 2026-05-06)
+- **Live at:** `https://fieldiq.jimmyhubbard2.cc` — HTTP/2 200, cert subject `*.jimmyhubbard2.cc`, FieldIQ HTML body confirmed, `x-cache: Hit from cloudfront`. Verified live via iPad on VPN.
+- **CloudFront update applied** to distribution `E12Z80TRB0P2XR` (new ETag `E3UN6WX5RRO2AG`):
+  - `Aliases.Quantity: 0 → 1`, `Items: ["fieldiq.jimmyhubbard2.cc"]`
+  - `ViewerCertificate`: was `{CloudFrontDefaultCertificate: true, SSLSupportMethod: vip, MinimumProtocolVersion: TLSv1, CertificateSource: cloudfront}` → now `{ACMCertificateArn: <wildcard cert ARN>, SSLSupportMethod: sni-only, MinimumProtocolVersion: TLSv1.2_2021, CertificateSource: acm}`
+  - All other config (origins, behaviors, cache policies, error responses) untouched.
+- **cPanel CNAME added:** Name `fieldiq.jimmyhubbard2.cc.` → Value `d1q3x6tsvbllgg.cloudfront.net.` (TTL default).
+- **cPanel UI note:** the "+ CNAME Record" button opens a stripped form showing only Name and CNAME (target) fields — no Type, Value, or TTL fields. Type is implicit; TTL inherits zone default. This is normal for the modern cPanel zone editor.
+- **README updated** ([FieldIQ commit `d5dae3f`](https://github.com/jhubb88/FieldIQ/commit/d5dae3f)) — `**Live demo:**` swapped from `cloudfront.net` to subdomain. Push triggered fast deploy-only path on prewarm.yml; completed in 48s.
+- **Cert state:** `InUseBy: [arn:aws:cloudfront::603509861186:distribution/E12Z80TRB0P2XR]` (was `[]` pre-Phase-B; will accumulate one ARN per Phase C distribution).
+
+#### Phase B verification gotcha — local resolver caches
+Both Claude Code's WSL local resolver and Jimmy's home router (Cablelynx CAX30 at 192.168.1.1) cached NXDOMAIN for `fieldiq.jimmyhubbard2.cc` from queries made before the cPanel CNAME was added. The negative cache held >15 min after the record went live; only a router reboot or TTL expiry clears it. Public resolvers (Google DoH, Cloudflare 1.1.1.1) saw the record within seconds. Authoritative `dns1.namecheaphosting.com.` had it immediately.
+
+**The Phase B verification poller failed misleadingly for 30 attempts** because it used DoH for the DNS check but local-resolver curl for the HTTPS check — so it kept reporting "DNS resolves but HTTPS=000". The site was live the whole time; only the local-resolver path was broken.
+
+**For Phase C verification, do NOT trust the local resolver.** Use one of:
+- `curl --resolve <subdomain>:443:<CF-edge-IP> https://<subdomain>/` (CF edge IP via `curl 'https://dns.google/resolve?name=<distribution-domain>&type=A' | jq -r .Answer[0].data`)
+- DoH only: `curl -s 'https://dns.google/resolve?name=<subdomain>&type=CNAME'` (Status 0 + Answer populated = live)
+- External network: phone on cellular, VPN, or dnschecker.org
+
+#### Phase C — batch rollout to remaining 8 projects (next)
+Pattern is now validated. Per project, four steps:
+1. **CloudFront update:** `get-distribution-config` → modify Aliases + ViewerCertificate (same diff as Phase B above) → `update-distribution --if-match <ETag>`. ~30s per project; edge re-deploys in ~5–15 min but doesn't block.
+2. **cPanel CNAME:** add `<subdomain>.jimmyhubbard2.cc.` CNAME → `<distribution-domain>.cloudfront.net.` via cPanel Zone Editor.
+3. **Verify** via `--resolve` curl or DoH (NOT local resolver — see gotcha above).
+4. **README update:** swap `**Live demo:**` URL from `cloudfront.net` to subdomain, commit + push.
+
+**Distribution → CloudFront domain → proposed subdomain map** (subdomain names are Jimmy's call — proposals reflect repo names with light shortening for the long ones):
+
+| Project | Distribution ID | CloudFront Domain | Proposed Subdomain |
+|---|---|---|---|
+| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `cloud-systems.jimmyhubbard2.cc` or `advanced.jimmyhubbard2.cc` |
+| text-to-audio | `E1BM7FLW1T9GAM` | `d2ey5cipu3t9y.cloudfront.net` | `text-to-audio.jimmyhubbard2.cc` |
+| log-analyzer | `E3Q8ZCVRAS854T` | `dn6duxmzpvyau.cloudfront.net` | `log-analyzer.jimmyhubbard2.cc` |
+| resume-matcher | `E3H0XAJDR3BQG1` | `d3t6z67os7y9is.cloudfront.net` | `resume-matcher.jimmyhubbard2.cc` |
+| traffic-dashboard | `E3H1V6C42HG9P1` | `d1t5py05a4uugi.cloudfront.net` | `traffic-dashboard.jimmyhubbard2.cc` |
+| ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` |
+| linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` |
+| rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` |
+
+After all 8, ACM cert `InUseBy` will list all 9 distribution ARNs.
 
 ---
 
