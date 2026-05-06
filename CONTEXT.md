@@ -148,16 +148,6 @@ Grid order as of 2026-04-19:
 - **Phase 12 deferred:** IaC drift realignment. Live `rag-knowledge-chatbot` CFN stack has drifted from local template across three axes (parameter names, Lambda env vars, missing warmup resources). Lambda code reference also stale (S3 zip is pre-v1.1; live Lambda runs Bedrock-only code via direct `update-function-code`). Functional behavior unaffected. Estimated 4–6 hour dedicated session. Full inventory in BUILD_LOG.md Phase 12 candidate.
 - Next active work: index format optimization (JSON→NumPy), ingest path normalization, response streaming
 
-### README polish pass (in progress, 2 of 4 fixed)
-- **Status: 2 of 4 issues fixed 2026-05-06; 2 remaining.**
-- Audit done 2026-05-04 across all 9 portfolio repos identified 3 HIGH and 1 MEDIUM issue. URL-correctness, secret-leak, and internal-path checks all clean; remaining issues are content/framing only.
-- **Fixed 2026-05-06:**
-  - `advanced-projects` (HIGH) — repo had no README at all. Added a catalog-page README (5 indexed projects, 3 Live + 2 Planned) plus a standard MIT LICENSE matching the convention used by the other 6 README'd repos. Commit `f0e1a79`.
-  - `FieldIQ` (HIGH) — Deployment section claimed "no CI/CD, deploy by hand" with a `aws s3 sync … --profile portfolio-user` block, and "Known issues" listed "No CI/CD" as a planned addition. Both stale since 2026-05-01 push-trigger shipped. Replaced with two-mode CI/CD description (push-to-main fast path + Sunday cron) and removed the stale Known-issues bullet. Commit `a42db95`.
-- **Remaining:**
-  - `linux-ops-command-copilot` (HIGH) — README exposes session-level Claude Code breadcrumbs ("Sessions 8 + 8.5 + 9 + 10 complete"), reads as a session wrap-up rather than project pitch (specific latency deltas vs older Sonnet, throttle numbers, $15 alarm), references `PROJECT_MASTER.md` as "session log, decisions, locked original planning document". Also missing License section, Author/GitHub link, portfolio footer; live URL is buried in the status paragraph instead of a labeled `**Live demo:**` line.
-  - `rag-chatbot` (MEDIUM) — Repository Layout publicly lists `CLAUDE.md` ("Working rules for Claude Code sessions") and `BUILD_LOG.md` ("Full phase-by-phase build log"); Engineering Decisions and Current Status reference internal "Phase 11" / "Phase 12 deferred" / "BUILD_LOG.md Phase 12 candidate". SambaNova vendor-criticism block is unusually long. License is non-standard ("no redistribution license granted") vs MIT used elsewhere.
-
 ### Advanced Projects Page Header Rename
 - **Status: PENDING (scheduled for 2026-04-20)**
 - Rename page header on Advanced Projects hosted app (https://d2uisqfxjzeo6a.cloudfront.net) from "Advanced Projects" → "Cloud & AI Systems" to match the renamed entry card on the Projects grid
