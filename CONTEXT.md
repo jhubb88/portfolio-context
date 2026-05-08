@@ -210,13 +210,13 @@ Both Claude Code's WSL local resolver and Jimmy's home router (Cablelynx CAX30 a
 | Project | Distribution ID | CloudFront Domain | Subdomain | Phase C status |
 |---|---|---|---|---|
 | text-to-audio | `E1BM7FLW1T9GAM` | `d2ey5cipu3t9y.cloudfront.net` | `text-to-audio.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
-| log-analyzer | `E3Q8ZCVRAS854T` | `dn6duxmzpvyau.cloudfront.net` | `log-analyzer.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
-| resume-matcher | `E3H0XAJDR3BQG1` | `d3t6z67os7y9is.cloudfront.net` | `resume-matcher.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
-| traffic-dashboard | `E3H1V6C42HG9P1` | `d1t5py05a4uugi.cloudfront.net` | `traffic-dashboard.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
-| ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
-| linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
-| rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` | DNS ✓; HTTPS 404 (DefaultRootObject bug, see below); README pending |
-| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `projects.jimmyhubbard2.cc` | held — depends on `linux-ops` and `rag` being verified live (its `index.html` has hardcoded `demoUrl` values for the three "Live" projects: fieldiq, linux-ops, rag) |
+| log-analyzer | `E3Q8ZCVRAS854T` | `dn6duxmzpvyau.cloudfront.net` | `log-analyzer.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| resume-matcher | `E3H0XAJDR3BQG1` | `d3t6z67os7y9is.cloudfront.net` | `resume-matcher.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| traffic-dashboard | `E3H1V6C42HG9P1` | `d1t5py05a4uugi.cloudfront.net` | `traffic-dashboard.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README (HTTPS resolved 2026-05-08 via deploy-side fix — workflow now syncs to `frontend/` prefix matching existing `DefaultRootObject`; CF config not changed) |
+| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `projects.jimmyhubbard2.cc` | held — depends on `linux-ops` and `rag` being verified live (its `index.html` has hardcoded `demoUrl` values for the three "Live" projects: fieldiq, linux-ops, rag). Both verified live 2026-05-08; ready for project 8 in next session. |
 
 **Cert `InUseBy` count:** 8 of 9 distributions (advanced-projects pending Phase C-8). Subdomain naming convention: repo name (or natural shortening) — e.g., `ntcip` not `ntcip-simulator`, `rag` not `rag-chatbot`, `projects` for `advanced-projects` (matches the WordPress card "Cloud & AI Systems (AWS)" thematic landing pattern).
 
@@ -229,16 +229,16 @@ On 2026-05-07 Namecheap had a platform-wide replication delay across BasicDNS / 
 
 The incident resolved within hours on 2026-05-07; all 6 Phase C records that were stuck during the incident published cleanly when replication caught up (verified via auth NS + HTTPS).
 
-#### rag-chatbot DefaultRootObject regression (discovered 2026-05-07)
-`https://d1r1qv7io7k8vk.cloudfront.net/` and `https://rag.jimmyhubbard2.cc/` return **HTTP 404 NoSuchKey** for `/`. Cause: the distribution's `DefaultRootObject` is `frontend/index.html`, but the 2026-05-04 cleanup (removing the orphan `s3://rag-chatbot-603509861186-dev/frontend/index.html` per `leaveoff_2026-05-04.md`) left only `index.html` at bucket root. CloudFront tries to fetch `frontend/index.html`, gets `NoSuchKey`. Bug has existed since 2026-05-04 — the leaveoff incorrectly stated "Live site unaffected (CloudFront serves bucket-root `index.html`)" without re-verifying after the orphan removal.
+#### rag-chatbot DefaultRootObject mismatch (discovered 2026-05-07, RESOLVED 2026-05-08 via deploy-side change)
+**What happened:** `https://d1r1qv7io7k8vk.cloudfront.net/` and `https://rag.jimmyhubbard2.cc/` were returning HTTP 404 NoSuchKey for `/`. Cause: the distribution's `DefaultRootObject` was `frontend/index.html`, but the 2026-05-04 cleanup (removing the orphan `s3://rag-chatbot-603509861186-dev/frontend/index.html` per `leaveoff_2026-05-04.md`) left only `index.html` at bucket root. CloudFront tried to fetch `frontend/index.html`, got `NoSuchKey`. Bug existed from 2026-05-04 to 2026-05-08 — the leaveoff incorrectly stated "Live site unaffected" without re-verifying after the orphan removal.
 
-**Fix:** one-line CloudFront update: `DefaultRootObject: "frontend/index.html"` → `"index.html"` on `EN88LEBW14923`. Aligns with the current deploy pattern (sync `frontend/` *contents* to bucket *root*). Pending Jimmy's confirmation since it modifies a production live distribution beyond Phase C scope.
+**Resolution path chosen (2026-05-08):** rather than changing `DefaultRootObject`, the deploy workflow was changed to sync to the `frontend/` prefix instead of bucket root (rag-chatbot commit `6fe9c2d "fix(ci): sync frontend assets to frontend/ prefix, not bucket root"` plus `077807a "chore(template): reconcile local template to deployed state"`). On the next deploy, `s3://rag-chatbot-603509861186-dev/frontend/index.html` was repopulated with current content, and CloudFront's existing `DefaultRootObject: "frontend/index.html"` immediately resolved correctly. Live URL verified 2026-05-08: HTTP 200, full body, x-cache hit. **CloudFront configuration was NOT changed** — `DefaultRootObject` stays at `frontend/index.html` and aligns with the new deploy target. Lesson going forward: the rag-chatbot bucket layout convention is `frontend/index.html`, NOT bucket-root.
 
 #### Phase C remaining work
-1. Fix rag-chatbot `DefaultRootObject` (one CloudFront update on `EN88LEBW14923`)
-2. Re-verify rag.jimmyhubbard2.cc + raw cloudfront.net URL both serve 200
-3. Update 6 READMEs in batch (log-analyzer, resume-matcher, traffic-dashboard, ntcip-simulator, linux-ops, rag-chatbot — `**Live demo:**` lines; rag-chatbot also has L6 `**Portfolio:**` link held until project 8)
-4. Project 8 (advanced-projects): CloudFront update for `E1VZ0ELKDC3LN0`, cPanel CNAME for `projects.jimmyhubbard2.cc`, `index.html` `demoUrl` edits (rag, fieldiq, linux-ops references), README. **Will hit Namecheap publish-stuck flow if their replication is still delayed when this happens** — heads-up for the chat.
+1. ~~Fix rag-chatbot `DefaultRootObject`~~ — superseded; resolved via deploy-side change (see above) without modifying CF config.
+2. ~~Re-verify rag.jimmyhubbard2.cc + raw cloudfront.net URL both serve 200~~ — done 2026-05-08, both 200.
+3. ~~Update 6 READMEs (log-analyzer, resume-matcher, traffic-dashboard, ntcip-simulator, linux-ops, rag-chatbot — `**Live demo:**` lines)~~ — done 2026-05-08, separate commits per repo: `766f765`, `8093c43`, `6e92181`, `778bc5d`, `6589687`, `a630285`.
+4. **Project 8 (advanced-projects)** — held for next session. Work: CloudFront update for `E1VZ0ELKDC3LN0`, cPanel CNAME for `projects.jimmyhubbard2.cc`, `index.html` `demoUrl` edits (fieldiq + linux-ops + rag references), README L5 own-link, plus rag-chatbot README L6 `**Portfolio:**` cross-reference flip in a small follow-up commit on rag-chatbot. **Will hit Namecheap publish-stuck flow if their replication delay recurs** — open LiveChat for one zone sync covering `projects.jimmyhubbard2.cc` if needed.
 
 ---
 
