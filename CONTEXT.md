@@ -203,27 +203,42 @@ Both Claude Code's WSL local resolver and Jimmy's home router (Cablelynx CAX30 a
 - DoH only: `curl -s 'https://dns.google/resolve?name=<subdomain>&type=CNAME'` (Status 0 + Answer populated = live)
 - External network: phone on cellular, VPN, or dnschecker.org
 
-#### Phase C — batch rollout to remaining 8 projects (next)
-Pattern is now validated. Per project, four steps:
-1. **CloudFront update:** `get-distribution-config` → modify Aliases + ViewerCertificate (same diff as Phase B above) → `update-distribution --if-match <ETag>`. ~30s per project; edge re-deploys in ~5–15 min but doesn't block.
-2. **cPanel CNAME:** add `<subdomain>.jimmyhubbard2.cc.` CNAME → `<distribution-domain>.cloudfront.net.` via cPanel Zone Editor.
-3. **Verify** via `--resolve` curl or DoH (NOT local resolver — see gotcha above).
-4. **README update:** swap `**Live demo:**` URL from `cloudfront.net` to subdomain, commit + push.
+#### Phase C — batch rollout to remaining 8 projects (in progress 2026-05-07)
 
-**Distribution → CloudFront domain → proposed subdomain map** (subdomain names are Jimmy's call — proposals reflect repo names with light shortening for the long ones):
+**Final subdomain → distribution mapping (as approved + acted on):**
 
-| Project | Distribution ID | CloudFront Domain | Proposed Subdomain |
-|---|---|---|---|
-| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `cloud-systems.jimmyhubbard2.cc` or `advanced.jimmyhubbard2.cc` |
-| text-to-audio | `E1BM7FLW1T9GAM` | `d2ey5cipu3t9y.cloudfront.net` | `text-to-audio.jimmyhubbard2.cc` |
-| log-analyzer | `E3Q8ZCVRAS854T` | `dn6duxmzpvyau.cloudfront.net` | `log-analyzer.jimmyhubbard2.cc` |
-| resume-matcher | `E3H0XAJDR3BQG1` | `d3t6z67os7y9is.cloudfront.net` | `resume-matcher.jimmyhubbard2.cc` |
-| traffic-dashboard | `E3H1V6C42HG9P1` | `d1t5py05a4uugi.cloudfront.net` | `traffic-dashboard.jimmyhubbard2.cc` |
-| ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` |
-| linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` |
-| rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` |
+| Project | Distribution ID | CloudFront Domain | Subdomain | Phase C status |
+|---|---|---|---|---|
+| text-to-audio | `E1BM7FLW1T9GAM` | `d2ey5cipu3t9y.cloudfront.net` | `text-to-audio.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
+| log-analyzer | `E3Q8ZCVRAS854T` | `dn6duxmzpvyau.cloudfront.net` | `log-analyzer.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
+| resume-matcher | `E3H0XAJDR3BQG1` | `d3t6z67os7y9is.cloudfront.net` | `resume-matcher.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
+| traffic-dashboard | `E3H1V6C42HG9P1` | `d1t5py05a4uugi.cloudfront.net` | `traffic-dashboard.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
+| ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
+| linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` | DNS+HTTPS ✓; README pending |
+| rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` | DNS ✓; HTTPS 404 (DefaultRootObject bug, see below); README pending |
+| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `projects.jimmyhubbard2.cc` | held — depends on `linux-ops` and `rag` being verified live (its `index.html` has hardcoded `demoUrl` values for the three "Live" projects: fieldiq, linux-ops, rag) |
 
-After all 8, ACM cert `InUseBy` will list all 9 distribution ARNs.
+**Cert `InUseBy` count:** 8 of 9 distributions (advanced-projects pending Phase C-8). Subdomain naming convention: repo name (or natural shortening) — e.g., `ntcip` not `ntcip-simulator`, `rag` not `rag-chatbot`, `projects` for `advanced-projects` (matches the WordPress card "Cloud & AI Systems (AWS)" thematic landing pattern).
+
+#### Phase C verification gotcha — Namecheap replication delays (incident 2026-05-07)
+On 2026-05-07 Namecheap had a platform-wide replication delay across BasicDNS / PremiumDNS / FreeDNS / Web Hosting nameservers. **Symptom:** cPanel Zone Editor accepts saves (UI shows the row), but new records do NOT propagate to the cluster auth NS. SOA serial does not bump. Authoritative `dns1/dns2.namecheaphosting.com` returns NXDOMAIN with `aa=1` for the new names. Existing records keep resolving normally.
+
+**Diagnostic that proves it's the platform issue (not a per-record bug):** raw UDP query to the auth NS IPs (156.154.132.200 / 156.154.133.200) returns NXDOMAIN with the AA bit, AND the SOA serial is unchanged hours after the cPanel save. If those two signals match, it's the systemic publish-stuck issue, not propagation lag.
+
+**Fix:** open Namecheap LiveChat and ask them to "synchronize the DNS zone to the cluster nameservers." A backend agent can push the zone in seconds. They confirmed records added during the incident will replicate automatically once their fix lands — no need to re-add. **Future cPanel saves on this account during a similar incident will be similarly stuck; this is not auto-resolving on the user side.**
+
+The incident resolved within hours on 2026-05-07; all 6 Phase C records that were stuck during the incident published cleanly when replication caught up (verified via auth NS + HTTPS).
+
+#### rag-chatbot DefaultRootObject regression (discovered 2026-05-07)
+`https://d1r1qv7io7k8vk.cloudfront.net/` and `https://rag.jimmyhubbard2.cc/` return **HTTP 404 NoSuchKey** for `/`. Cause: the distribution's `DefaultRootObject` is `frontend/index.html`, but the 2026-05-04 cleanup (removing the orphan `s3://rag-chatbot-603509861186-dev/frontend/index.html` per `leaveoff_2026-05-04.md`) left only `index.html` at bucket root. CloudFront tries to fetch `frontend/index.html`, gets `NoSuchKey`. Bug has existed since 2026-05-04 — the leaveoff incorrectly stated "Live site unaffected (CloudFront serves bucket-root `index.html`)" without re-verifying after the orphan removal.
+
+**Fix:** one-line CloudFront update: `DefaultRootObject: "frontend/index.html"` → `"index.html"` on `EN88LEBW14923`. Aligns with the current deploy pattern (sync `frontend/` *contents* to bucket *root*). Pending Jimmy's confirmation since it modifies a production live distribution beyond Phase C scope.
+
+#### Phase C remaining work
+1. Fix rag-chatbot `DefaultRootObject` (one CloudFront update on `EN88LEBW14923`)
+2. Re-verify rag.jimmyhubbard2.cc + raw cloudfront.net URL both serve 200
+3. Update 6 READMEs in batch (log-analyzer, resume-matcher, traffic-dashboard, ntcip-simulator, linux-ops, rag-chatbot — `**Live demo:**` lines; rag-chatbot also has L6 `**Portfolio:**` link held until project 8)
+4. Project 8 (advanced-projects): CloudFront update for `E1VZ0ELKDC3LN0`, cPanel CNAME for `projects.jimmyhubbard2.cc`, `index.html` `demoUrl` edits (rag, fieldiq, linux-ops references), README. **Will hit Namecheap publish-stuck flow if their replication is still delayed when this happens** — heads-up for the chat.
 
 ---
 
