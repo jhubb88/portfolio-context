@@ -203,7 +203,7 @@ Both Claude Code's WSL local resolver and Jimmy's home router (Cablelynx CAX30 a
 - DoH only: `curl -s 'https://dns.google/resolve?name=<subdomain>&type=CNAME'` (Status 0 + Answer populated = live)
 - External network: phone on cellular, VPN, or dnschecker.org
 
-#### Phase C — batch rollout to remaining 8 projects (in progress 2026-05-07)
+#### Phase C — batch rollout to remaining 8 projects (COMPLETE 2026-05-09 — 9 of 9 portfolio subdomains live)
 
 **Final subdomain → distribution mapping (as approved + acted on):**
 
@@ -216,9 +216,9 @@ Both Claude Code's WSL local resolver and Jimmy's home router (Cablelynx CAX30 a
 | ntcip-simulator | `E2PEIMT1J3W4MO` | `d1r8pxnmau5sot.cloudfront.net` | `ntcip.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
 | linux-ops-command-copilot | `E39D8FLKEFZ16I` | `d1dqp0w50lre0j.cloudfront.net` | `linux-ops.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README |
 | rag-chatbot | `EN88LEBW14923` | `d1r1qv7io7k8vk.cloudfront.net` | `rag.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README (HTTPS resolved 2026-05-08 via deploy-side fix — workflow now syncs to `frontend/` prefix matching existing `DefaultRootObject`; CF config not changed) |
-| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `projects.jimmyhubbard2.cc` | held — depends on `linux-ops` and `rag` being verified live (its `index.html` has hardcoded `demoUrl` values for the three "Live" projects: fieldiq, linux-ops, rag). Both verified live 2026-05-08; ready for project 8 in next session. |
+| advanced-projects | `E1VZ0ELKDC3LN0` | `d2uisqfxjzeo6a.cloudfront.net` | `projects.jimmyhubbard2.cc` | ✓ DNS+HTTPS+README+demoUrls (shipped 2026-05-09 — commits `ca9cf0c` index.html demoUrls + `42eaa50` README L5; cross-repo follow-up `4fe2458` on rag-chatbot README L6 Portfolio link) |
 
-**Cert `InUseBy` count:** 8 of 9 distributions (advanced-projects pending Phase C-8). Subdomain naming convention: repo name (or natural shortening) — e.g., `ntcip` not `ntcip-simulator`, `rag` not `rag-chatbot`, `projects` for `advanced-projects` (matches the WordPress card "Cloud & AI Systems (AWS)" thematic landing pattern).
+**Cert `InUseBy` count:** **9 of 9 distributions — Phase C complete.** Subdomain naming convention: repo name (or natural shortening) — e.g., `ntcip` not `ntcip-simulator`, `rag` not `rag-chatbot`, `projects` for `advanced-projects` (matches the WordPress card "Cloud & AI Systems (AWS)" thematic landing pattern).
 
 #### Phase C verification gotcha — Namecheap replication delays (incident 2026-05-07)
 On 2026-05-07 Namecheap had a platform-wide replication delay across BasicDNS / PremiumDNS / FreeDNS / Web Hosting nameservers. **Symptom:** cPanel Zone Editor accepts saves (UI shows the row), but new records do NOT propagate to the cluster auth NS. SOA serial does not bump. Authoritative `dns1/dns2.namecheaphosting.com` returns NXDOMAIN with `aa=1` for the new names. Existing records keep resolving normally.
@@ -234,11 +234,19 @@ The incident resolved within hours on 2026-05-07; all 6 Phase C records that wer
 
 **Resolution path chosen (2026-05-08):** rather than changing `DefaultRootObject`, the deploy workflow was changed to sync to the `frontend/` prefix instead of bucket root (rag-chatbot commit `6fe9c2d "fix(ci): sync frontend assets to frontend/ prefix, not bucket root"` plus `077807a "chore(template): reconcile local template to deployed state"`). On the next deploy, `s3://rag-chatbot-603509861186-dev/frontend/index.html` was repopulated with current content, and CloudFront's existing `DefaultRootObject: "frontend/index.html"` immediately resolved correctly. Live URL verified 2026-05-08: HTTP 200, full body, x-cache hit. **CloudFront configuration was NOT changed** — `DefaultRootObject` stays at `frontend/index.html` and aligns with the new deploy target. Lesson going forward: the rag-chatbot bucket layout convention is `frontend/index.html`, NOT bucket-root.
 
-#### Phase C remaining work
-1. ~~Fix rag-chatbot `DefaultRootObject`~~ — superseded; resolved via deploy-side change (see above) without modifying CF config.
+#### Phase C closure
+All Phase C work complete as of 2026-05-09. Completed items in chronological order:
+1. ~~Fix rag-chatbot `DefaultRootObject`~~ — resolved via deploy-side change without modifying CF config.
 2. ~~Re-verify rag.jimmyhubbard2.cc + raw cloudfront.net URL both serve 200~~ — done 2026-05-08, both 200.
 3. ~~Update 6 READMEs (log-analyzer, resume-matcher, traffic-dashboard, ntcip-simulator, linux-ops, rag-chatbot — `**Live demo:**` lines)~~ — done 2026-05-08, separate commits per repo: `766f765`, `8093c43`, `6e92181`, `778bc5d`, `6589687`, `a630285`.
-4. **Project 8 (advanced-projects)** — held for next session. Work: CloudFront update for `E1VZ0ELKDC3LN0`, cPanel CNAME for `projects.jimmyhubbard2.cc`, `index.html` `demoUrl` edits (fieldiq + linux-ops + rag references), README L5 own-link, plus rag-chatbot README L6 `**Portfolio:**` cross-reference flip in a small follow-up commit on rag-chatbot. **Will hit Namecheap publish-stuck flow if their replication delay recurs** — open LiveChat for one zone sync covering `projects.jimmyhubbard2.cc` if needed.
+4. ~~Project 8 (advanced-projects)~~ — shipped 2026-05-09. CloudFront `E1VZ0ELKDC3LN0` updated with alias + ACM cert (same Phase B/C diff pattern), cPanel CNAME `projects.jimmyhubbard2.cc.` → `d2uisqfxjzeo6a.cloudfront.net.` added (publish-stuck pattern recurred briefly; resolved via Namecheap LiveChat zone sync as documented in the "Namecheap replication delays" subsection above). Two commits on advanced-projects per Jimmy's split-commit rule: `ca9cf0c` (index.html demoUrls — rag/fieldiq/linux-ops to subdomains) + `42eaa50` (README L5 own-link). Cross-repo follow-up `4fe2458` on rag-chatbot flipped README L6 `**Portfolio:**` link to subdomain. rag-chatbot's paths-filter (`frontend/**` + workflow file) correctly blocked the README change at root from triggering a workflow run — verified via `gh run list`.
+
+#### Final state (2026-05-09)
+- **9 of 9 portfolio subdomains live** at `<project>.jimmyhubbard2.cc` over HTTPS via the wildcard ACM cert
+- **Cert `InUseBy` = 9** distributions
+- All public-facing READMEs link to subdomains; no raw `*.cloudfront.net` URLs in any user-visible Live demo / Portfolio line
+- advanced-projects catalog page (`projects.jimmyhubbard2.cc`) `demoUrl` values reference the three live "Live" subdomains (rag, fieldiq, linux-ops)
+- Namecheap LiveChat zone-sync pattern is the established fix for any future cPanel publish-stuck recurrence (see Phase C verification gotcha subsection above)
 
 ---
 
